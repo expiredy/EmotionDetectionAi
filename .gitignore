@@ -1,0 +1,5 @@
+#ide chase files
+.idea/
+
+#my personal scheme for take over the wor... I mean for planning my app architecture, of course
+**.drawio

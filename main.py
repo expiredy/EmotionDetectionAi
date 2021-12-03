@@ -1,6 +1,6 @@
 import cv2 as opencv
 
-from ai_frame_processor import frame_analytics_processor
+from ai_frame_processing import frame_analytics_processor
 
 
 def video_analyzing_loop(video_stream_capture):

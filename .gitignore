@@ -1,8 +1,20 @@
-#ide chase files
+#ide cache files
 .idea/
+.vscode/
+
+#Some C++ buiding configuration stuff
+build/
+CMakeLists.txt
+
+#I don't want to anyone had an access to my computers secret milk, so i gonna ignore all .exe files. sorry :>
+**.exe
+**.pyd
 
 #my personal scheme for take over the wor... I mean for planning my app architecture, of course
 **.drawio
 
 #dataset (i want commiting that, cause this is too much weighs and i am too like speed for waiting for uploading it)
 database/
+
+#Somethin', that I don't want to show you
+side_usage_stuff/

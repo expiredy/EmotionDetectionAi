@@ -5,7 +5,7 @@
 #Some C++ buiding configuration stuff
 build/
 cmake-build-debug/
-CMakeLists.txt
+
 
 #I don't want to anyone had an access to my computers secret milk, so i gonna ignore all .exe files. sorry :>
 **.exe

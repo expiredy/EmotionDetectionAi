@@ -4,10 +4,15 @@ project(MainSystemCore VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
+add_executable(MainSystemCore main.cpp)
+
 find_package( OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(MainSystemCore main.cpp)
+include_directories(${PYTHON_INCLUDE_DIRS})
+
+set(PYBIND11_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11)
+add_subdirectory(${PYBIND11_DIR}/ pybind11)
 
 target_link_libraries( MainSystemCore ${OpenCV_LIBS})
 

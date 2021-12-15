@@ -1,10 +1,13 @@
 import psycopg2
 
-from dotenv import load_dotenv
-load_dotenv(".env")
+from dotenv import dotenv_values
 
 
-conn = psycopg2.connect(dbname='database', user='db_user',
-                        password='mypassword', host='localhost')
+config = dotenv_values(".env")
+
+database_name = "database"
+
+conn = psycopg2.connect(dbname=database_name, user=config["USER_NAME"],
+                        password=config["PASSWORD_FOR_DATABASE"], host='localhost')
 
 cursor = conn.cursor()

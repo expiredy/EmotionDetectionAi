@@ -5,7 +5,7 @@
 //#include <SQLAPI.h>
 
 #include <string>
-
+using std::string;
 namespace opencv = cv;
 
 static bool isAppInRun = true;
@@ -18,7 +18,7 @@ opencv::Mat preprocessFrame(opencv::Mat currentFrame){
 int main(int, char**)
 {
     // Sorry i have no idea how 2 initialize adoptive file paths
-    std::string analyzingVideoFilePath = "D:/ProjectsField/neuralNetworkForEmotionDetection/database/VerySeriousVideoForAnalyze.mp4";
+    string analyzingVideoFilePath = "D:/ProjectsField/neuralNetworkForEmotionDetection/database/VerySeriousVideoForAnalyze.mp4";
 
     opencv::Mat frame;
     opencv::VideoCapture capturing;

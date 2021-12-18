@@ -3,7 +3,7 @@ from distutils.core import setup, Extension
 
 ext_modules = [
     Extension(
-        'library', # название нашей либы
+        'library',  # название нашей либы
         ['library.cpp', 'main.cpp'], # файлики которые компилируем
         include_dirs=[pybind11.get_include()],  # не забываем добавить инклюды pybind11
         language='c++',

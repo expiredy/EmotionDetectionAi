@@ -1,11 +1,12 @@
 #ide cache files
 .idea/
 .vscode/
+.vs/
 
 #Some C++ buiding configuration stuff
 build/
 cmake-build-debug/
-
+out/
 
 #I don't want to anyone had an access to my computers secret milk, so i gonna ignore all .exe files. sorry :>
 **.exe
@@ -378,3 +379,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+#.env file's configuration
+**/.env

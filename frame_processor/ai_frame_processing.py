@@ -1,44 +1,51 @@
 import face_recognition
-
 import cv2 as opencv
-
 from numpy import ndarray
 
+import os
+from filetype import is_image
 
-def frame_analytics_processor(frame: ndarray):
-    def detect_face(img):
-        # convert the test image to gray image as opencv face detector expects gray images
-        gray = opencv.cvtColor(img, opencv.COLOR_BGR2GRAY)
+DATASET_FOLDER_PATH = "./../database/"
 
-        # load OpenCV face detector, I am using LBP which is fast
-        # there is also a more accurate but slow Haar classifier
-        face_cascade = opencv.CascadeClassifier('opencv-processing-files/lbpcascade_frontalface.xml')
 
-        # let's detect multiscale (some images may be closer to camera than others) images
-        # result is a list of faces
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+class ProcessingImage:
+    def __init__(self):
+        pass
 
-        # if no faces are detected then return original img
-        if (len(faces) == 0):
-            return None, None
+    def get_visualized_data_frame(self):
+        pass
 
-        # under the assumption that there will be only one face,
-        # extract the face area
-        (x, y, w, h) = faces[0]
 
-        # return only the face part of the image
-        return gray[y:y + w, x:x + h], faces[0]
+def frame_analytics_processor(current_frame_image: ndarray) -> (dict, ndarray):
+    def use_current_frame_image() -> ndarray:
+        return current_frame_image
 
-    return detect_face(frame)
+    def get_all_faces_position() -> list[ndarray]:
+        all_faces_position_array = face_recognition.face_locations(use_current_frame_image())
+        return all_faces_position_array
+
+    def get_more_attractive_face_position() -> ndarray:
+        pass
+
+    some_data = get_all_faces_position()
+
+    return {}, current_frame_image
+
+
+def get_loaded_dataset() -> list[ndarray]:
+    for root, directories, files in os.walk(DATASET_FOLDER_PATH):
+        for file_name in files:
+            if is_image(os.path.join(root, file_name)):
+                yield face_recognition.face_encodings(opencv.imread(os.path.join(root, file_name)))[0]
 
 
 def test():
-    image = opencv.imread("./../database/face-image/woman-smiling-again.jpg")
-    opencv.imshow("fuck1", image)
-    opencv.waitKey(0)
-    framinator_three_thousand = frame_analytics_processor(image)
-    opencv.imshow("fuck", framinator_three_thousand)
-    opencv.waitKey(0)
+    print("start")
+    all_dataset_images = get_loaded_dataset()
+    test_image = face_recognition.face_encodings(opencv.imread(r"C:\Users\yarao\Downloads\ummE-VZb4-E.jpg"))[0]
+    print("all data was given")
+    result = face_recognition.compare_faces(list(all_dataset_images), test_image)
+    print(result)
 
 
 if __name__ == "__main__":

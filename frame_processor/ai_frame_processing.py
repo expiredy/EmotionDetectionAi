@@ -2,6 +2,11 @@ import face_recognition
 import cv2 as opencv
 from numpy import ndarray
 
+import os
+from filetype import is_image
+
+DATASET_FOLDER_PATH = "./../database/"
+
 
 class ProcessingImage:
     def __init__(self):
@@ -12,29 +17,31 @@ class ProcessingImage:
 
 
 def frame_analytics_processor(current_frame_image: ndarray) -> (dict, ndarray):
+    def use_current_frame_image() -> ndarray:
+        return current_frame_image
+
     def get_all_faces_position() -> list[ndarray]:
-        pass
+        all_faces_position_array = face_recognition.face_locations(use_current_frame_image())
 
-    def get_more_atractive_face_position() -> ndarray:
+    def get_more_attractive_face_position() -> ndarray:
         pass
-
 
     return {}, current_frame_image
 
 
+def get_loaded_dataset() -> list[ndarray]:
+    for root, directories, files in os.walk(DATASET_FOLDER_PATH):
+        for file_name in files:
+            if is_image(os.path.join(root, file_name)):
+                yield face_recognition.face_encodings(opencv.imread(os.path.join(root, file_name)))[0]
+
+
 def test():
-    image1 = opencv.imread("./../database/andrew-baranow/coool.jpg")
-    image2 = opencv.imread("./../database/andrew-baranow/chair.jpg")
-
-    framinator_three_thousand = frame_analytics_processor(image1)[1]
-    framinator_four_thousand = frame_analytics_processor(image2)[0]
-
-    results = face_recognition.compare_faces([framinator_three_thousand], framinator_four_thousand)
-
-    print(results)
-    # opencv.imshow("fuck", framinator_three_thousand)
-    # opencv.waitKey(0)
-    print(framinator_three_thousand)
+    all_dataset_images = get_loaded_dataset()
+    test_image = face_recognition.face_encodings(opencv.imread(r"C:\Users\yarao\Downloads\ummE-VZb4-E.jpg"))[1]
+    print("all data was given")
+    result = face_recognition.compare_faces(list(all_dataset_images), test_image)
+    print(result)
 
 
 if __name__ == "__main__":

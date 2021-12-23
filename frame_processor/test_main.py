@@ -1,60 +1,58 @@
-import numpy as np
-import cv2
-print(cv2.__file__)
-import pickle
-
-face_cascade = cv2.CascadeClassifier('./opencv-processing-files/cascades/data/haarcascade_frontalface_alt2.xml')
-eye_cascade = cv2.CascadeClassifier('./opencv-processing-files/cascades/data/haarcascade_eye.xml')
-smile_cascade = cv2.CascadeClassifier('./opencv-processing-files/cascades/data/haarcascade_smile.xml')
+import cv2 as opencv
+import mediapipe
+import time
+from threading import Thread
 
 
-recognizer = cv2.face.LBPHFaceRecognizer_create()
-recognizer.read("./opencv-processing-files/recognizers/face-trainner.yml")
+class FaceDetector:
+    results = None
+    croping = (500, 500)
 
-labels = {"person_name": 1}
-with open("./opencv-processing-files/pickles/face-labels.pickle", 'rb') as f:
-    og_labels = pickle.load(f)
-    labels = {v:k for k,v in og_labels.items()}
+    def __init__(self, min_detection_con=0.5):
+        self.min_detection_con = min_detection_con
+        self.mediapipe_face_detection = mediapipe.solutions.face_detection
+        self.mediapipe_raw = mediapipe.solutions.drawing_utils
+        self.face_detection = self.mediapipe_face_detection.FaceDetection(self.min_detection_con)
 
-cap = cv2.VideoCapture("./../database/VerySeriousVideoForAnalyze.mp4")
+    def __preprocess_frame_image(self, video_stream_frame):
+        opencv.resise()
+        return opencv.cvtColor(video_stream_frame, opencv.COLOR_BGR2RGB)
 
-while(True):
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)
-    for (x, y, w, h) in faces:
-        #print(x,y,w,h)
-        roi_gray = gray[y:y+h, x:x+w] #(ycord_start, ycord_end)
-        roi_color = frame[y:y+h, x:x+w]
+    def get_find_faces(self, video_stream_frame, is_debug_mode=True):
+        video_stream_frame = self.__preprocess_frame_image(video_stream_frame)
+        self.results = self.face_detection.process(imgRGB)
+        bboxs = []
+        if self.results.detections:
+            for index, detection in enumerate(self.results.detections):
+                bboxC = detection.location_data.relative_bounding_box
+                image_height, image_width, ic = video_stream_frame.shape
+                bbox = int(bboxC.xmin * image_width), int(bboxC.ymin * image_height),\
+                       int(bboxC.width * image_width), int(bboxC.height * image_height)
+                if is_debug_mode:
+                    video_stream_frame = self.debug_draw(video_stream_frame, bbox)
+        return video_stream_frame, bboxs
 
-        # recognize? deep learned model predict keras tensorflow pytorch scikit learn
-        id_, conf = recognizer.predict(roi_gray)
-        if conf>=4 and conf <= 85:
-            #print(5: #id_)
-    		#print(labels[id_])
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            name = labels[id_]
-            color = (255, 255, 255)
-            stroke = 2
-            cv2.putText(frame, name, (x,y), font, 1, color, stroke, cv2.LINE_AA)
+    def debug_draw(self, video_stream_frame, bbox, rt=4):
+        opencv.rectangle(video_stream_frame, bbox, (255, 0, 255), rt)
+        return video_stream_frame
 
-        img_item = "7.png"
-        cv2.imwrite(img_item, roi_color)
 
-        color = (255, 0, 0) #BGR 0-255
-        stroke = 2
-        end_cord_x = x + w
-        end_cord_y = y + h
-        cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), color, stroke)
-        #subitems = smile_cascade.detectMultiScale(roi_gray)
-    	#for (ex,ey,ew,eh) in subitems:
-    	#	cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
-    # Display the resulting frame
-    cv2.imshow('frame',frame)
-    if cv2.waitKey(20) & 0xFF == ord('q'):
-        break
+def main():
+    session_is_running = True
+    video = [r"C:\Users\yarao\Videos\4K Video Downloader\AndrewBaranov.mp4",
+             "./../database/VerySeriousVideoForAnalyze.mp4"]
+    video_stream_capture = opencv.VideoCapture(video[0])
+    face_detector = FaceDetector()
+    processor = FaceAnalyticThread()
+    processor.start()
+    while session_is_running:
+        frame_status, image_frame = video_stream_capture.read()
+        if frame_status:
+            image_frame, bboxs = face_detector.get_find_faces(image_frame)
+            opencv.imshow("Image", image_frame)
+            if opencv.waitKey(1) == 27:
+                session_is_running = False
 
-# When everything done, release the capture
-cap.release()
-cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()

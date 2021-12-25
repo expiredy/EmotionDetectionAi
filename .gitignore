@@ -9,8 +9,6 @@ cmake-build-debug/
 out/
 
 dist/
-test_main.spec
-
 
 #I don't want to anyone had an access to my computers secret milk, so i gonna ignore all .exe files. sorry :>
 **.exe

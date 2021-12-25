@@ -1,12 +1,11 @@
 import face_recognition
+from deepface import DeepFace
 import cv2 as opencv
 import numpy
 from numpy import ndarray
-
+from random import randrange
 import os
 from filetype import is_image
-
-DATASET_FOLDER_PATH = "./../database/"
 
 
 class ProcessingImage:
@@ -24,8 +23,6 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
             print("given box", face_box)
             cropped_image = current_frame_image[face_box[3]:face_box[0],
                                                 face_box[1]:face_box[2]]
-            opencv.imshow("ASss",  cropped_image)
-            opencv.waitKey(0)
             for recognized_face in face_recognition.face_locations(cropped_image):
                 print(recognized_face)
                 real_faces_array.append(recognized_face)
@@ -43,18 +40,30 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
                 most_attractive_person = face_box
         return most_attractive_person
 
-    all_face_locations = get_all_real_faces_position()
-    analysable_face_box = get_most_attractive_face_position()
-    analysable_face_box = [analysable_face_box[2], analysable_face_box[3],
-                           analysable_face_box[1], analysable_face_box[0]]
-    print("for analys", analysable_face_box)
-    image_for_analyze = current_frame_image[analysable_face_box[3]:analysable_face_box[0],
-                                            analysable_face_box[1]:analysable_face_box[2]]
+    def get_emotion(current_frame_image):
+        obj = DeepFace.analyze(current_frame_image, actions=['age', 'gender', 'emotion'], enforce_detection=False)
+        print(obj)
+        return obj
 
-    opencv.imshow("shet", image_for_analyze)
-    opencv.waitKey(0)
+    if all_face_locations:
+        try:
+            all_face_locations = get_all_real_faces_position()
+            analysable_face_box = get_most_attractive_face_position()
+            analysable_face_box = [analysable_face_box[2], analysable_face_box[3],
+                                   analysable_face_box[1], analysable_face_box[0]]
+            print("for analys", analysable_face_box)
+            image_for_analyze = current_frame_image[analysable_face_box[3]:analysable_face_box[0],
+                                                    analysable_face_box[1]:analysable_face_box[2]]
 
-    return ()
+            deep_analyze_response = get_emotion(image_for_analyze)
+            print(deep_analyze_response)
+            return randrange(1, 5000),\
+                   deep_analyze_response["age"],\
+                   deep_analyze_response["gender"],\
+                   deep_analyze_response["dominant_emotion"]
+        except IndexError:
+            pass
+    return -1, "", 0, ""
 
 
 def test():
@@ -62,12 +71,8 @@ def test():
               r"D:\ProjectsField\neuralNetworkForEmotionDetection\database\andrew-baranow\chair.jpg",
               r"D:\ProjectsField\neuralNetworkForEmotionDetection\database\andrew-baranow\sunnt.jpg"]
     test_image = opencv.imread(images[0])
-    # opencv.imshow("Fuck-1", test_image)
     actually_size = (test_image.shape[:2])
     print("total recognized", face_recognition.face_locations(test_image))
-    # for face in face_recognition.face_locations(test_image):
-    #     opencv.rectangle(test_image, [face[-1]] + list(face[:-1]), (255, 0, 255), 3)
-    #     opencv.waitKey(0)
 
     frame_analytics_processor(test_image, [(actually_size[0], 0, actually_size[1], 0)])
 

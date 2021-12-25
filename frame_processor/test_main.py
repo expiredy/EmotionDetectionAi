@@ -5,6 +5,8 @@ import threading
 from threading import Thread
 from numpy import ndarray
 from asyncio import get_event_loop
+from ai_frame_processing import frame_analytics_processor
+from api_request import send_request_to_API
 
 
 class FrameProcessingThread(Thread):
@@ -25,12 +27,16 @@ class FrameProcessingThread(Thread):
         print(f"{self.getName()} is dead")
 
     def run(self):
+        person_id, person_gender, person_age, person_mood = frame_analytics_processor(self.processing_video_frame,
+                                                                                      self.array_of_face_boxes)
+        send_request_to_API(person_id, person_gender, person_age, person_mood)
+        # send_request_to_API(10, "fucker", 20, "fucked")
         print(f"{self.getName()} is started")
 
 
 class NeuralNetworkProcessManager:
-    SKIP_FRAMES_COUNT = 15
-    TOTAL_ALLOWED_THREADS = 20
+    SKIP_FRAMES_COUNT = 5
+    TOTAL_ALLOWED_THREADS = 30
     max_frames_per_second = 60
     fps_counter = int
     processing_loop = get_event_loop
@@ -58,7 +64,6 @@ class NeuralNetworkProcessManager:
         self.processing_threads_holder_array[processing_thread_index] = \
             FrameProcessingThread(self.current_video_frame, self.array_of_face_boxes)
         self.processing_threads_holder_array[processing_thread_index].start()
-
 
     def get_frame_update(self, current_video_frame: ndarray, array_of_face_boxes: list):
         self.current_video_frame, self.array_of_face_boxes = current_video_frame, array_of_face_boxes
@@ -116,8 +121,14 @@ def main():
     face_detector = FaceDetector()
     processing_manager = NeuralNetworkProcessManager()
 
+    frame_status, image_frame = bool, ndarray
+
     while session_is_running:
-        frame_status, image_frame = video_stream_capture.read()
+        try:
+            frame_status, image_frame = video_stream_capture.read()
+        except KeyboardInterrupt:
+            session_is_running = False
+
         if frame_status:
             image_frame, bboxs = face_detector.get_find_faces(image_frame)
             opencv.imshow("Debug window", image_frame)

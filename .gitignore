@@ -8,6 +8,8 @@ build/
 cmake-build-debug/
 out/
 
+dist/
+
 #I don't want to anyone had an access to my computers secret milk, so i gonna ignore all .exe files. sorry :>
 **.exe
 **.pyd

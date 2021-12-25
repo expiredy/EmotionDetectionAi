@@ -5,6 +5,8 @@ import threading
 from threading import Thread
 from numpy import ndarray
 from asyncio import get_event_loop
+from ai_frame_processing import frame_analytics_processor
+from api_request import send_request_to_API
 
 
 class FrameProcessingThread(Thread):
@@ -25,13 +27,17 @@ class FrameProcessingThread(Thread):
         print(f"{self.getName()} is dead")
 
     def run(self):
+        person_id, person_gender, person_age, person_mood = frame_analytics_processor(self.processing_video_frame,
+                                                                                      self.array_of_face_boxes)
+        if person_id >= 0:
+            send_request_to_API(person_id, person_gender, person_age, person_mood)
         print(f"{self.getName()} is started")
 
 
 class NeuralNetworkProcessManager:
-    SKIP_FRAMES_COUNT = 15
-    TOTAL_ALLOWED_THREADS = 20
-    max_frames_per_second = 60
+    SKIP_FRAMES_COUNT = 60
+    TOTAL_ALLOWED_THREADS = 3
+    max_frames_per_second = 120
     fps_counter = int
     processing_loop = get_event_loop
 
@@ -55,10 +61,12 @@ class NeuralNetworkProcessManager:
                 self.__create_new_process(processing_thread_index)
 
     def __create_new_process(self, processing_thread_index: int):
-        self.processing_threads_holder_array[processing_thread_index] = \
-            FrameProcessingThread(self.current_video_frame, self.array_of_face_boxes)
-        self.processing_threads_holder_array[processing_thread_index].start()
-
+        try:
+            self.processing_threads_holder_array[processing_thread_index] = \
+                FrameProcessingThread(self.current_video_frame, self.array_of_face_boxes)
+            self.processing_threads_holder_array[processing_thread_index].start()
+        except BaseException:
+            return
 
     def get_frame_update(self, current_video_frame: ndarray, array_of_face_boxes: list):
         self.current_video_frame, self.array_of_face_boxes = current_video_frame, array_of_face_boxes
@@ -109,15 +117,36 @@ class FaceDetector:
 
 
 def main():
+    if input("Change default variables? y/n\n").lower().replace(" ", "") in ["yes", "yeah", "y"]:
+        try:
+            NeuralNetworkProcessManager.SKIP_FRAMES_COUNT = int(input("Enter count of skipping fps:   "))
+            NeuralNetworkProcessManager.TOTAL_ALLOWED_THREADS = int(input("Enter count of total allowed threads:    "))
+            NeuralNetworkProcessManager.max_frames_per_second =\
+                int(input("Enter count of max fps, restoring per second:    "))
+        except ValueError:
+            NeuralNetworkProcessManager.SKIP_FRAMES_COUNT = 40
+            NeuralNetworkProcessManager.TOTAL_ALLOWED_THREADS = 3
+            NeuralNetworkProcessManager.max_frames_per_second = 80
+            print("Something gone wrong, restored to default variables")
+
     session_is_running = True
-    video = [r"C:\Users\yarao\Videos\4K Video Downloader\AndrewBaranov.mp4",
-             "./../database/VerySeriousVideoForAnalyze.mp4"]
-    video_stream_capture = opencv.VideoCapture(video[1])
+    source = input("Enter path for vido of type '0' (zero) to enter wev cam mode")
+    try:
+        source = int(source)
+    except BaseException:
+        source = source
+    video_stream_capture = opencv.VideoCapture(source)
     face_detector = FaceDetector()
     processing_manager = NeuralNetworkProcessManager()
 
+    frame_status, image_frame = bool, ndarray
+
     while session_is_running:
-        frame_status, image_frame = video_stream_capture.read()
+        try:
+            frame_status, image_frame = video_stream_capture.read()
+        except KeyboardInterrupt:
+            session_is_running = False
+
         if frame_status:
             image_frame, bboxs = face_detector.get_find_faces(image_frame)
             opencv.imshow("Debug window", image_frame)

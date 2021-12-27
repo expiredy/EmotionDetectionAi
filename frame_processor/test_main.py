@@ -6,7 +6,7 @@ from threading import Thread
 from numpy import ndarray
 from asyncio import get_event_loop
 from ai_frame_processing import frame_analytics_processor
-from api_request import send_request_to_API
+from api_request import send_request_to_api
 
 
 class FrameProcessingThread(Thread):
@@ -30,7 +30,7 @@ class FrameProcessingThread(Thread):
         person_id, person_gender, person_age, person_mood = frame_analytics_processor(self.processing_video_frame,
                                                                                       self.array_of_face_boxes)
         if person_id >= 0:
-            send_request_to_API(person_id, person_gender, person_age, person_mood)
+            send_request_to_api(person_id, person_gender, person_age, person_mood)
         print(f"{self.getName()} is started")
 
 

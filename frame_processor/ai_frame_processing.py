@@ -42,7 +42,6 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
 
     def get_emotion(current_frame_image):
         obj = DeepFace.analyze(current_frame_image, actions=['age', 'gender', 'emotion'], enforce_detection=False)
-        print(obj)
         return obj
 
     if all_face_locations:
@@ -73,8 +72,9 @@ def test():
     test_image = opencv.imread(images[0])
     actually_size = (test_image.shape[:2])
     print("total recognized", face_recognition.face_locations(test_image))
-
     frame_analytics_processor(test_image, [(actually_size[0], 0, actually_size[1], 0)])
+    opencv.imshow("A", test_image)
+    opencv.waitKey(0)
 
 
 if __name__ == "__main__":

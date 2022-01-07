@@ -1,16 +1,19 @@
 <template>
     <div>
         <OptionNavBar/>
+        <DebugViewer/>
     </div>
 </template>
 
 <script>
 import OptionNavBar from './components/OptionNavBar.vue'
+import DebugViewer from './components/DebugViewer.vue'
 
 export default {
     name: 'App',
     components: {
-        OptionNavBar
+        OptionNavBar,
+        DebugViewer
     }
 }
 </script>

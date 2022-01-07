@@ -1,6 +1,6 @@
 <template>
     <div class="main-menu-activator">
-        <div class="col" v-on:onclick="OpenMenu">
+        <div class="col" v-on:onclick="OpenMenu()">
             <div class="special-con">
                 <div class="bar arrow-top-fall"></div>
                 <div class="bar arrow-middle-fall"></div>
@@ -16,7 +16,7 @@ export default {
     props: { },
     methods: {
         OpenMenu: function (event) {
-            console.log("Sheeesh")
+            console.log('Sheeesh')
         }
     }
 }

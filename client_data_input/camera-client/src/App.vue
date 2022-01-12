@@ -1,13 +1,19 @@
 <template>
     <div>
         <OptionNavBar/>
+        <div id="nav">
+            <router-link to="/">Home</router-link> |
+            <router-link to="/about">About</router-link>
+        </div>
+        <router-view/>
+
         <DebugViewer/>
     </div>
 </template>
 
 <script>
-import OptionNavBar from './components/OptionNavBar.vue'
-import DebugViewer from './components/DebugViewer.vue'
+import OptionNavBar from '@/components/OptionNavBar.vue'
+import DebugViewer from '@/components/DebugViewer.vue'
 
 export default {
     name: 'App',

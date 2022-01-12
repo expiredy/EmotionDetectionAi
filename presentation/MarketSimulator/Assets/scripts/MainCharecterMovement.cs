@@ -11,11 +11,17 @@ public class MainCharecterMovement : MonoBehaviour
     void Update()
     {
         ListenUserInput();
+        MakePersonMove();
     }
 
     void ListenUserInput()
     {
         this._yVerticalAxis = Input.GetAxis("Vertical");
         this._xHorizontalAxis = Input.GetAxis("Horizontal");
+    }
+
+    void MakePersonMove()
+    {
+        
     }
 }

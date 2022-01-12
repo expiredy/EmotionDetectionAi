@@ -22,8 +22,9 @@ export default {
     padding: 0;
     border: 0;
     margin: 0;
+    z-index: 10;
     position: flex;
-    background-color: rgb(0, 129, 235);
+    background-color: rgb(233, 233, 233);
     -webkit-filter: drop-shadow( 25px 25px 7px #000000b3);
     filter: drop-shadow( 0px 0px 50px rgba(0, 0, 0, .7));
 }

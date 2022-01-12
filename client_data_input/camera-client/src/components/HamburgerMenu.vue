@@ -1,12 +1,14 @@
 <template>
     <div class="main-menu-activator">
-        <div class="col" v-on:onclick="OpenMenu()">
-            <div class="special-con">
-                <div class="bar arrow-top-fall"></div>
-                <div class="bar arrow-middle-fall"></div>
-                <div class="bar arrow-bottom-fall"></div>
+        <button style=" border: none; outline: none;" v-on:click="OpenMenu">
+            <div class="col">
+               <div class="special-con">
+                  <div class="bar arrow-top-fall"></div>
+                  <div class="bar arrow-middle-fall"></div>
+                  <div class="bar arrow-bottom-fall"></div>
+               </div>
             </div>
-         </div>
+        </button>
     </div>
 </template>
 
@@ -15,10 +17,12 @@ export default {
     name: 'HamburgerMenu',
     props: { },
     methods: {
-        OpenMenu: function (event) {
+         OpenMenu: function (event) {
+            if (event) {
             console.log('Sheeesh')
-        }
-    }
+            }
+         }
+      }
 }
 
 </script>
@@ -32,20 +36,20 @@ export default {
    display: block;
    height: 5px;
    width: 50px;
-   background: #6FFFE9;
+   background: #df0000;
    margin: 10px auto;
  }
 
 .special-con:hover .bar {
-  background-color: #f92c8c;
+  background-color: #048300;
 }
 
 .col {
    display: inline-block;
-   width: 24%;
    text-align: center;
    height: auto;
    position: relative;
+   z-index: 100;
 }
 
 .middle {

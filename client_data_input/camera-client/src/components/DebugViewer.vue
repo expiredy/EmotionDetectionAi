@@ -25,8 +25,7 @@
         </div>
         
         <div v-if="isCameraOpen && !isLoading" class="camera-shoot">
-            <button type="button" class="button" @click="takePhoto">
-            <img src="https://img.icons8.com/material-outlined/50/000000/camera--v2.png">
+            <button type="button" @click="takePhoto">
             </button>
         </div>
     </div>
@@ -60,31 +59,30 @@ export default {
 
         createCameraElement() {
             this.isLoading = true;
-
             const constraints = (window.constraints = {
-	    			audio: false,
-	    			video: true
-	    		});
+            audio: false,
+            video: true
+            });
 
-
-	    	navigator.mediaDevices
-	    			.getUserMedia(constraints)
-	    			.then(stream => {
-                        this.isLoading = false;
-	    				this.$refs.camera.srcObject = stream;
-	    			})
-	    			.catch(error => {
-              this.isLoading = false;
-	    				alert("May the browser didn't support or there is some errors.");
-	    			});
+            navigator.mediaDevices
+                .getUserMedia(constraints)
+                .then(stream => {
+                            this.isLoading = false;
+                this.$refs.camera.srcObject = stream;
+                })
+                .catch(error => {
+                this.isLoading = false;
+                alert("May the browser didn't support or there is some errors.");
+                });
         },
 
         stopCameraStream() {
           let tracks = this.$refs.camera.srcObject.getTracks();
 
-	    		tracks.forEach(track => {
-	    			track.stop();
-	    		});
+          tracks.forEach(track => {
+            console.log(track);
+            track.stop();
+          });
         },
 
         takePhoto() {
@@ -111,7 +109,6 @@ export default {
 
 
 <style>
-
 .web-camera-container {
   margin-top: 2rem;
   margin-bottom: 2rem;
@@ -146,19 +143,6 @@ export default {
   .camera-shoot {
     margin: 1rem 0;
     
-    button {
-      height: 60px;
-      width: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 100%;
-      
-      img {
-        height: 35px;
-        object-fit: cover;
-      }
-    }
   }
   
   .camera-loading {

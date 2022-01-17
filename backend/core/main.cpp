@@ -9,9 +9,10 @@
 const int MAX_CONNECTED_CLIENT_COUNT = 3;
 static bool isServerIsActive = true;
 
+
 class ClientStructrController{
 public:
-    explicit ClientStructrController(SOCKET currentClientSocket){
+     ClientStructrController(SOCKET currentClientSocket){
         clientSocket = currentClientSocket;
         listeningThread = std::thread(ClientListenerLoop);
         respondingThread = std::thread(ClientDataTransmitterLoop);
@@ -53,7 +54,7 @@ private:
 
     static void ClientDataTransmitterLoop(){
         while (isServerIsActive){
-
+            //TODO: make a respondiong loop
         }
     }
 };
@@ -148,7 +149,7 @@ private:
             }
             else{
                 isConnectionLoopIsAvailable = false;
-            };
+            }
         }
     }
 

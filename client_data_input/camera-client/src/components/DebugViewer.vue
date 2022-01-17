@@ -15,6 +15,7 @@
             </ul>
         </div>
         
+        
         <div v-if="isCameraOpen" v-show="!isLoading" class="camera-box" :class="{ 'flash' : isShotPhoto }">
             
             <div class="camera-shutter" :class="{'flash' : isShotPhoto}"></div>
@@ -128,15 +129,15 @@ export default {
   
   .camera-box {    
     .camera-shutter {
-      opacity: 0;
-      width: 450px;
-      height: 337.5px;
-      background-color: #fff;
-      position: absolute;
-      
-      &.flash {
-        opacity: 1;
-      }
+        opacity: 0;
+        width: 450px;
+        height: 337.5px;
+        background-color: #fff;
+        position: absolute;
+        
+        &.flash {
+          opacity: 1;
+        }
     }
   }
   
@@ -200,13 +201,13 @@ export default {
 
   @keyframes preload {
     0% {
-      opacity: 1
+        opacity: 1
     }
     50% {
-      opacity: .4
+        opacity: .4
     }
     100% {
-      opacity: 1
+        opacity: 1
     }
   }
 }

@@ -1,146 +1,166 @@
 #include <iostream>
 #include <WS2tcpip.h>
+#include <thread>
 #pragma comment(lib, "ws2_32.lib")
 #include <string>
+#include <vector>
 
 
-class SocketConnectionVideoReceiver{
-    bool isListeningLoopIsAvailable, isConnectionLoopIsAvailable;
-    sockaddr_in hint;
-    WSADATA winSocketData;
+const int MAX_CONNECTED_CLIENT_COUNT = 3;
+static bool isServerIsActive = true;
 
+
+class ClientStructrController{
 public:
-    SocketConnectionVideoReceiver(bool listeningLoopFlag, bool connectionLoopFlag) {
-        isListeningLoopIsAvailable = listeningLoopFlag;
-        isConnectionLoopIsAvailable = connectionLoopFlag;
+     ClientStructrController(SOCKET currentClientSocket){
+        clientSocket = currentClientSocket;
+        listeningThread = std::thread(ClientListenerLoop);
+        respondingThread = std::thread(ClientDataTransmitterLoop);
+    }
+
+    void KillConnection(){
+        closesocket(clientSocket);
+        WSACleanup();
+        system("pause");
     }
 
 private:
-    void CreateSocketConnection(){
-        
+    std::thread listeningThread, respondingThread;
+    static SOCKET clientSocket;
+
+    static void ClientListenerLoop(){
+        char buffer[4096];
+
+        while (isServerIsActive)
+        {
+            ZeroMemory(buffer, 4096);
+
+            int bytesReceived = recv(clientSocket, buffer, 4096, 0);
+            if (bytesReceived == SOCKET_ERROR)
+            {
+                std::cerr << "Error in recv(). Quitting" << std::endl;
+                isServerIsActive = false;
+            }
+
+            if (bytesReceived == 0)
+            {
+                std::cout << "Client disconnected " << std::endl;
+                isServerIsActive = false;
+            }
+            std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
+            send(clientSocket, buffer, bytesReceived + 1, 0);
+        }
+    }
+
+    static void ClientDataTransmitterLoop(){
+        while (isServerIsActive){
+            //TODO: make a respondiong loop
+        }
     }
 };
 
 
-auto initializeSocketConnection(){
+class SocketConnectionVideoReceiver{
+    bool isConnectionLoopIsAvailable;
+    char host[NI_MAXHOST];
+    char service[NI_MAXSERV];
 
-    WORD ver = MAKEWORD(2, 2);
-
-    int wsOk = WSAStartup(ver, &winSocketData);
-    if (wsOk != 0)
-    {
-        std::cerr << "Can't Initialize winsock! Quitting" << std::endl;
-        return 1;
+public:
+    SocketConnectionVideoReceiver(bool listeningLoopFlag, bool connectionLoopFlag) {
+        isServerIsActive = listeningLoopFlag;
+        isConnectionLoopIsAvailable = connectionLoopFlag;
+        listeningSocket = initializeListeningSocketServer();
+        clientsControllersHolder = std::vector<ClientStructrController>();
+        StartConnectingToServerSession();
     }
 
-    // Create a socket
-    SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (listeningSocket == INVALID_SOCKET)
-    {
-        std::cerr << "Can't create a socket! Quitting" << std::endl;
-        return 1;
+    void EndSession() {
+        std::vector <ClientStructrController> :: iterator currentController;
+        //TODO: make an ending for the current session with clearing main data vector
     }
 
-
-    hint.sin_family = AF_INET;
-    hint.sin_port = htons(54000);
-    hint.sin_addr.S_un.S_addr = INADDR_ANY;
-
-    bind(listeningSocket, (sockaddr*)&hint, sizeof(hint));
-    listen(listeningSocket, SOMAXCONN);
-
-    // Wait for a connection
+private:
+    SOCKET listeningSocket;
+    sockaddr_in connectionHint;
     sockaddr_in client;
-    int clientSize = sizeof(client);
+    WSADATA winSocketData;
+    std::vector<ClientStructrController> clientsControllersHolder;
 
-    return accept(listeningSocket, (sockaddr*)&client, &clientSize);
-}
+    SOCKET initializeListeningSocketServer(){
 
+        WORD ver = MAKEWORD(2, 2);
 
-void waitingForConnection(sockaddr_in client, char host, char service){
-    if (getnameinfo((sockaddr*)&client,
-                    sizeof(client),
-                    host,
-                    NI_MAXHOST,
-                    service,
-                    NI_MAXSERV,
-                    0) == 0)
-    {
-        std::cout << host << " connected on port " << service << std::endl;
+        int wsOk = WSAStartup(ver, &winSocketData);
+        if (wsOk != 0)
+        {
+            std::cerr << "Can't Initialize winsock! Quitting" << std::endl;
+            return 1;
+        }
+
+        // Create a socket
+        listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
+        if (listeningSocket == INVALID_SOCKET)
+        {
+            std::cerr << "Can't create a socket! Quitting" << std::endl;
+            return 1;
+        }
+
+        StartListening();
+        SetConnectionHintWay();
+
+        // Wait for a connection
+        return listeningSocket;
     }
-    else
-    {
-        inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-        std::cout << host << " connected on port " <<
-                  ntohs(client.sin_port) << std::endl;
-    }
-    closesocket(listeningSocket);
-}
 
+    void StartListening(){
+        bind(listeningSocket, (sockaddr*)&connectionHint, sizeof(connectionHint));
+        listen(listeningSocket, SOMAXCONN);
+    }
+
+    void SetConnectionHintWay(){
+        connectionHint.sin_family = AF_INET;
+        connectionHint.sin_port = htons(54000);
+        connectionHint.sin_addr.S_un.S_addr = INADDR_ANY;
+
+    }
+
+    void StartConnectingToServerSession(){
+        while (isConnectionLoopIsAvailable){
+            accept(listeningSocket, (sockaddr*)&client, NULL);
+            if (getnameinfo((sockaddr*)&client,
+                            sizeof(client),
+                            host,
+                            NI_MAXHOST,
+                            service,
+                            NI_MAXSERV,
+                            0) == 0)
+            {
+                std::cout << host << " connected on port " << service << std::endl;
+            }
+            else
+            {
+                inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
+                std::cout << host << " connected on port " <<
+                          ntohs(client.sin_port) << std::endl;
+            }
+            if (clientsControllersHolder.size() < MAX_CONNECTED_CLIENT_COUNT){
+                ClientStructrController newClient = ClientStructrController(listeningSocket);
+                clientsControllersHolder.push_back(newClient);
+            }
+            else{
+                isConnectionLoopIsAvailable = false;
+            }
+        }
+    }
+
+};
 
 
 
 int main()
 {
-    // Initialze winsock
-
-
-    SOCKET clientSocket;
-    sockaddr_in client;
-//    auto [clientSocket, client] = initializeSocketConnection();
-
-    char host[NI_MAXHOST];
-    char service[NI_MAXSERV];
-
-    ZeroMemory(host, NI_MAXHOST);
-    ZeroMemory(service, NI_MAXSERV);
-
-    if (getnameinfo((sockaddr*)&client,
-                    sizeof(client),
-                    host,
-                    NI_MAXHOST,
-                    service,
-                    NI_MAXSERV,
-                    0) == 0)
-    {
-        std::cout << host << " connected on port " << service << std::endl;
-    }
-    else
-    {
-        inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-        std::cout << host << " connected on port " <<
-                  ntohs(client.sin_port) << std::endl;
-    }
-
-    char buf[4096];
-
-    while (isListeningLoopIsAvailable)
-    {
-        ZeroMemory(buf, 4096);
-
-        int bytesReceived = recv(clientSocket, buf, 4096, 0);
-        if (bytesReceived == SOCKET_ERROR)
-        {
-            std::cerr << "Error in recv(). Quitting" << std::endl;
-            isListeningLoopIsAvailable = false;
-        }
-
-        if (bytesReceived == 0)
-        {
-            std::cout << "Client disconnected " << std::endl;
-            isListeningLoopIsAvailable = false;
-        }
-        std::cout << std::string(buf, 0, bytesReceived) << std::endl;
-        send(clientSocket, buf, bytesReceived + 1, 0);
-
-    }
-
-    closesocket(clientSocket);
-    WSACleanup();
-
-    system("pause");
-
     SocketConnectionVideoReceiver currentServer = SocketConnectionVideoReceiver(true, true);
+    currentServer.EndSession();
 
     return 0;
 }

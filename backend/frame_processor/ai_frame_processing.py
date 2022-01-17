@@ -17,14 +17,14 @@ class ProcessingImage:
 
 
 def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: list) -> tuple[int, str, int, str]:
+    all_face_locations = [(face_location[1], face_location[2], face_location[3], face_location[0])
+                          for face_location in all_face_locations]
     def get_all_real_faces_position() -> list:
         real_faces_array = []
         for face_box in all_face_locations:
-            print("given box", face_box)
             cropped_image = current_frame_image[face_box[3]:face_box[0],
                                                 face_box[1]:face_box[2]]
             for recognized_face in face_recognition.face_locations(cropped_image):
-                print(recognized_face)
                 real_faces_array.append(recognized_face)
         return real_faces_array
 
@@ -47,7 +47,11 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
     if all_face_locations:
         try:
             all_face_locations = get_all_real_faces_position()
+            print(all_face_locations)
+
             analysable_face_box = get_most_attractive_face_position()
+
+            print(analysable_face_box)
             analysable_face_box = [analysable_face_box[2], analysable_face_box[3],
                                    analysable_face_box[1], analysable_face_box[0]]
             print("for analys", analysable_face_box)
@@ -60,19 +64,20 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
                    deep_analyze_response["age"],\
                    deep_analyze_response["gender"],\
                    deep_analyze_response["dominant_emotion"]
-        except IndexError:
+        except BufferError:
+            print("fuck")
             pass
     return -1, "", 0, ""
 
 
 def test():
-    images = [r"D:\ProjectsField\neuralNetworkForEmotionDetection\database\andrew-baranow\coool.jpg",
+    images = [r"D:\ProjectsField\neuralNetworkForEmotionDetection\backend\database\andrew-baranow\coool.jpg",
               r"D:\ProjectsField\neuralNetworkForEmotionDetection\database\andrew-baranow\chair.jpg",
               r"D:\ProjectsField\neuralNetworkForEmotionDetection\database\andrew-baranow\sunnt.jpg"]
     test_image = opencv.imread(images[0])
     actually_size = (test_image.shape[:2])
     print("total recognized", face_recognition.face_locations(test_image))
-    frame_analytics_processor(test_image, [(actually_size[0], 0, actually_size[1], 0)])
+    frame_analytics_processor(test_image, [(0, actually_size[0], 0, actually_size[1])])
     opencv.imshow("A", test_image)
     opencv.waitKey(0)
 

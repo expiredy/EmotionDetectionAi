@@ -14,49 +14,51 @@ class ClientStructrController{
 public:
      ClientStructrController(SOCKET currentClientSocket){
         clientSocket = currentClientSocket;
-        listeningThread = std::thread(ClientListenerLoop);
-        respondingThread = std::thread(ClientDataTransmitterLoop);
+        std::thread listeningThread(&ClientStructrController::ClientListenerLoop, clientSocket);
+		std::thread respondingThread(&ClientStructrController::ClientDataTransmitterLoop, clientSocket);
     }
 
     void KillConnection(){
-        closesocket(clientSocket);
-        WSACleanup();
-        system("pause");
+//		 listeningThread.join();
+//		 respondingThread.join();
+		 closesocket(clientSocket);
+         WSACleanup();
+         system("pause");
     }
 
 private:
-    std::thread listeningThread, respondingThread;
-    static SOCKET clientSocket;
+//    std::thread listeningThread, respondingThread;
+    SOCKET clientSocket;
+	void ClientListenerLoop(SOCKET clientSocket){
+		char buffer[4096];
 
-    static void ClientListenerLoop(){
-        char buffer[4096];
+		while (isServerIsActive)
+		{
+			ZeroMemory(buffer, 4096);
 
-        while (isServerIsActive)
-        {
-            ZeroMemory(buffer, 4096);
+			int bytesReceived = recv(clientSocket, buffer, 4096, 0);
+			if (bytesReceived == SOCKET_ERROR)
+			{
+				std::cerr << "Error in recv(). Quitting" << std::endl;
+				isServerIsActive = false;
+			}
 
-            int bytesReceived = recv(clientSocket, buffer, 4096, 0);
-            if (bytesReceived == SOCKET_ERROR)
-            {
-                std::cerr << "Error in recv(). Quitting" << std::endl;
-                isServerIsActive = false;
-            }
+			if (bytesReceived == 0)
+			{
+				std::cout << "Client disconnected " << std::endl;
+				isServerIsActive = false;
+			}
+			std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
+			send(clientSocket, buffer, bytesReceived + 1, 0);
+		}
+	}
 
-            if (bytesReceived == 0)
-            {
-                std::cout << "Client disconnected " << std::endl;
-                isServerIsActive = false;
-            }
-            std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
-            send(clientSocket, buffer, bytesReceived + 1, 0);
-        }
-    }
+	void ClientDataTransmitterLoop(SOCKET clientSocket){
+		while (isServerIsActive){
+			//TODO: make a respondiong loop
+		}
+	}
 
-    static void ClientDataTransmitterLoop(){
-        while (isServerIsActive){
-            //TODO: make a respondiong loop
-        }
-    }
 };
 
 
@@ -75,7 +77,6 @@ public:
     }
 
     void EndSession() {
-        std::vector <ClientStructrController> :: iterator currentController;
         //TODO: make an ending for the current session with clearing main data vector
     }
 
@@ -154,8 +155,6 @@ private:
     }
 
 };
-
-
 
 int main()
 {

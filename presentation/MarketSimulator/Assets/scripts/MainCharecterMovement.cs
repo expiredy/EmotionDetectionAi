@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class MainCharecterMovement : MonoBehaviour
 {
-
-    private static float _currentMovementSpeed = 10f;
-    private float _xHorizontalAxis, _yVerticalAxis;
+    const float startingStoppingSpeed = 0.7f; 
+    
+    private float _currentMovementSpeed = 10f;
+    private float _xMovementAxis, _zMovementAxis;
     
     void Update()
     {
@@ -16,12 +17,22 @@ public class MainCharecterMovement : MonoBehaviour
 
     void ListenUserInput()
     {
-        this._yVerticalAxis = Input.GetAxis("Vertical");
-        this._xHorizontalAxis = Input.GetAxis("Horizontal");
+        this._xMovementAxis = Input.GetAxis("Horizontal");
+        this._zMovementAxis = Input.GetAxis("Vertical");
     }
 
     void MakePersonMove()
     {
-        
+        if ((Mathf.Abs(this._xMovementAxis) <= startingStoppingSpeed) && (Mathf.Abs(this._zMovementAxis) <= startingStoppingSpeed))
+        {
+            //Start doing animations of walk starting
+        }
+        else
+        {
+            this.transform.position = new Vector3(this.transform.position.x + this._xMovementAxis * this._currentMovementSpeed * Time.deltaTime,
+                this.transform.position.y,
+                this.transform.position.z + this._zMovementAxis * this._currentMovementSpeed * Time.deltaTime);
+        }
     }
+
 }

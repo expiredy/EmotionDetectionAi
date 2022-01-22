@@ -15,6 +15,7 @@
 import OptionNavBar from '@/components/OptionNavBar.vue'
 import DebugViewer from '@/components/DebugViewer.vue'
 
+
 export default {
     name: 'App',
     components: {

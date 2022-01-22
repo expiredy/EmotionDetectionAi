@@ -1,6 +1,6 @@
 <template>
     <div class="main-menu-activator">
-        <button style=" border: none; outline: none;" v-on:click="OpenMenu">
+        <button class="hamburger-button" v-on:click="OpenMenu">
             <div class="col">
                <div class="special-con">
                   <div class="bar arrow-top-fall"></div>
@@ -54,6 +54,12 @@ export default {
 
 .middle {
    margin: 0 auto;
+}
+
+.hamburger-button{
+   border: none;
+   outline: none;
+   background-color: rgba(0,0,0,0);
 }
 
 .bar {

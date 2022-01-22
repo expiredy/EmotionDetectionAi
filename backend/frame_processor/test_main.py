@@ -12,8 +12,6 @@ from api_request import send_request_to_api
 class FrameProcessingThread(Thread):
     stop_thread_event = threading.Event
 
-    acync_processing_loop = get_event_loop
-
     processing_video_frame = ndarray
     array_of_face_boxes = list
 

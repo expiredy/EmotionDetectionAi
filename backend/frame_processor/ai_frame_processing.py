@@ -17,15 +17,19 @@ class ProcessingImage:
 
 
 def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: list) -> tuple[int, str, int, str]:
-    all_face_locations = [(face_location[1], face_location[2], face_location[3], face_location[0])
-                          for face_location in all_face_locations]
+    # all_face_locations = [(face_location[1], face_location[2], face_location[3], face_location[0])
+    #                       for face_location in all_face_locations]
+
     def get_all_real_faces_position() -> list:
         real_faces_array = []
         for face_box in all_face_locations:
-            cropped_image = current_frame_image[face_box[3]:face_box[0],
-                                                face_box[1]:face_box[2]]
-            for recognized_face in face_recognition.face_locations(cropped_image):
-                real_faces_array.append(recognized_face)
+            cropped_image = current_frame_image[face_box[1]:face_box[3],
+                                                face_box[0]:face_box[2]]
+            try:
+                for recognized_face in face_recognition.face_locations(cropped_image):
+                    real_faces_array.append(recognized_face)
+            except BaseException:
+                pass 
         return real_faces_array
 
     def get_most_attractive_face_position():
@@ -41,7 +45,7 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
         return most_attractive_person
 
     def get_emotion(current_frame_image):
-        obj = DeepFace.analyze(current_frame_image, actions=['age', 'gender', 'emotion'], enforce_detection=False)
+        obj = DeepFace.analyze(current_frame_image, actions=('age', 'gender', 'emotion'), enforce_detection=False)
         return obj
 
     if all_face_locations:
@@ -49,21 +53,22 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
             all_face_locations = get_all_real_faces_position()
             print(all_face_locations)
 
-            analysable_face_box = get_most_attractive_face_position()
+            if all_face_locations:
+                analysable_face_box = get_most_attractive_face_position()
 
-            print(analysable_face_box)
-            analysable_face_box = [analysable_face_box[2], analysable_face_box[3],
-                                   analysable_face_box[1], analysable_face_box[0]]
-            print("for analys", analysable_face_box)
-            image_for_analyze = current_frame_image[analysable_face_box[3]:analysable_face_box[0],
-                                                    analysable_face_box[1]:analysable_face_box[2]]
+                print(analysable_face_box)
+                analysable_face_box = [analysable_face_box[2], analysable_face_box[3],
+                                       analysable_face_box[1], analysable_face_box[0]]
+                print("for analys", analysable_face_box)
+                image_for_analyze = current_frame_image[analysable_face_box[3]:analysable_face_box[0],
+                                                        analysable_face_box[1]:analysable_face_box[2]]
 
-            deep_analyze_response = get_emotion(image_for_analyze)
-            print(deep_analyze_response)
-            return randrange(1, 5000),\
-                   deep_analyze_response["age"],\
-                   deep_analyze_response["gender"],\
-                   deep_analyze_response["dominant_emotion"]
+                deep_analyze_response = get_emotion(image_for_analyze)
+                print(deep_analyze_response)
+                return randrange(1, 5000),\
+                       deep_analyze_response["age"],\
+                       deep_analyze_response["gender"],\
+                       deep_analyze_response["dominant_emotion"]
         except BufferError:
             print("fuck")
             pass
@@ -77,7 +82,8 @@ def test():
     test_image = opencv.imread(images[0])
     actually_size = (test_image.shape[:2])
     print("total recognized", face_recognition.face_locations(test_image))
-    frame_analytics_processor(test_image, [(0, actually_size[0], 0, actually_size[1])])
+    opencv.rectangle(test_image, (100, 200, actually_size[0], actually_size[1]), (255, 0, 255), 4)
+    frame_analytics_processor(test_image, [(100, 200, actually_size[0], actually_size[1])])
     opencv.imshow("A", test_image)
     opencv.waitKey(0)
 

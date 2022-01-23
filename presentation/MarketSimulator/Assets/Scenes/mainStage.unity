@@ -630,7 +630,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32b55cfff593f640876863106e129bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetTransform: {fileID: 0}
+  referenceTransform: {fileID: 800870576}
+  collisionOffset: 0.3
+  cameraSpeed: 15
 --- !u!1 &1689166019
 GameObject:
   m_ObjectHideFlags: 0

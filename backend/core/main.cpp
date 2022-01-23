@@ -14,8 +14,8 @@ class ClientStructrController{
 public:
      ClientStructrController(SOCKET currentClientSocket){
         clientSocket = currentClientSocket;
-        std::thread listeningThread(&ClientStructrController::ClientListenerLoop, clientSocket);
-		std::thread respondingThread(&ClientStructrController::ClientDataTransmitterLoop, clientSocket);
+//        std::thread listeningThread(&ClientStructrController::ClientListenerLoop, clientSocket);
+//		std::thread respondingThread(&ClientStructrController::ClientDataTransmitterLoop, clientSocket);
     }
 
     void KillConnection(){
@@ -64,8 +64,6 @@ private:
 
 class SocketConnectionVideoReceiver{
     bool isConnectionLoopIsAvailable;
-    char host[NI_MAXHOST];
-    char service[NI_MAXSERV];
 
 public:
     SocketConnectionVideoReceiver(bool listeningLoopFlag, bool connectionLoopFlag) {
@@ -83,7 +81,6 @@ public:
 private:
     SOCKET listeningSocket;
     sockaddr_in connectionHint;
-    sockaddr_in client;
     WSADATA winSocketData;
     std::vector<ClientStructrController> clientsControllersHolder;
 
@@ -106,8 +103,8 @@ private:
             return 1;
         }
 
-        StartListening();
         SetConnectionHintWay();
+		StartListening();
 
         // Wait for a connection
         return listeningSocket;
@@ -126,26 +123,33 @@ private:
     }
 
     void StartConnectingToServerSession(){
+		std::string bannedAddress = "kubernetes.docker.internal";
         while (isConnectionLoopIsAvailable){
-            accept(listeningSocket, (sockaddr*)&client, NULL);
-            if (getnameinfo((sockaddr*)&client,
-                            sizeof(client),
-                            host,
-                            NI_MAXHOST,
-                            service,
-                            NI_MAXSERV,
-                            0) == 0)
-            {
-                std::cout << host << " connected on port " << service << std::endl;
+			sockaddr_in client;
+			int clientSize = sizeof(client);
+            SOCKET newClientConnection = accept(listeningSocket, (sockaddr*)&client, &clientSize);
+			char clientConnectionName[NI_MAXHOST];		// Client's remote name
+			char service[NI_MAXSERV];	// Service (i.e. port) the client is connect on
+
+			ZeroMemory(clientConnectionName, NI_MAXHOST); // same as memset(host, 0, NI_MAXHOST);
+			ZeroMemory(service, NI_MAXSERV);
+            if ((getnameinfo((sockaddr*)&client,
+				clientSize,
+				clientConnectionName,
+				NI_MAXHOST,
+				service,
+				NI_MAXSERV,
+				0) == 0) && (clientConnectionName != bannedAddress)){
+                std::cout << clientConnectionName << " connected on port " << service << std::endl;
             }
             else
             {
-                inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-                std::cout << host << " connected on port " <<
+                inet_ntop(AF_INET, &client.sin_addr, clientConnectionName, NI_MAXHOST);
+                std::cout << clientConnectionName << " connected on port " <<
                           ntohs(client.sin_port) << std::endl;
             }
             if (clientsControllersHolder.size() < MAX_CONNECTED_CLIENT_COUNT){
-                ClientStructrController newClient = ClientStructrController(listeningSocket);
+                ClientStructrController newClient = ClientStructrController(newClientConnection);
                 clientsControllersHolder.push_back(newClient);
             }
             else{

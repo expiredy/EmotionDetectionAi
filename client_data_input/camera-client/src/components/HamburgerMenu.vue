@@ -19,7 +19,7 @@ export default {
     methods: {
          OpenMenu: function (event) {
             if (event) {
-            console.log('Sheeesh')
+               console.log('Sheeesh')
             }
          }
       }

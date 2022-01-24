@@ -12,8 +12,6 @@ from api_request import send_request_to_api
 class FrameProcessingThread(Thread):
     stop_thread_event = threading.Event
 
-    acync_processing_loop = get_event_loop
-
     processing_video_frame = ndarray
     array_of_face_boxes = list
 
@@ -36,8 +34,8 @@ class FrameProcessingThread(Thread):
 
 class NeuralNetworkProcessManager:
     SKIP_FRAMES_COUNT = 60
-    TOTAL_ALLOWED_THREADS = 3
-    max_frames_per_second = 120
+    TOTAL_ALLOWED_THREADS = 2
+    max_frames_per_second = 180
     fps_counter = int
     processing_loop = get_event_loop
 
@@ -72,7 +70,7 @@ class NeuralNetworkProcessManager:
         self.current_video_frame, self.array_of_face_boxes = current_video_frame, array_of_face_boxes
         self.fps_counter += 1
         if self.fps_counter % self.SKIP_FRAMES_COUNT == 0:
-           self.processing_loop.run_until_complete(self.start_new_processing_session())
+            self.processing_loop.run_until_complete(self.start_new_processing_session())
         self.fps_counter %= self.max_frames_per_second
 
 
@@ -125,12 +123,12 @@ def main():
                 int(input("Enter count of max fps, restoring per second:    "))
         except ValueError:
             NeuralNetworkProcessManager.SKIP_FRAMES_COUNT = 40
-            NeuralNetworkProcessManager.TOTAL_ALLOWED_THREADS = 3
+            NeuralNetworkProcessManager.TOTAL_ALLOWED_THREADS = 2
             NeuralNetworkProcessManager.max_frames_per_second = 80
             print("Something gone wrong, restored to default variables")
 
     session_is_running = True
-    source = input("Enter path for vido of type '0' (zero) to enter wev cam mode")
+    source = input("Enter path for vido of type '0' (zero) to enter wev cam mode\n")
     try:
         source = int(source)
     except BaseException:

@@ -8,19 +8,16 @@ enable_testing()
 
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-
-
 find_package(pybind11 REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG)
 
 add_executable(MainSystemCore main.cpp)
 
-#add_library(neuralNetworkLib MODULE library.cpp)
+include_directories(${pybind11_INCLUDE_DIRS})
+target_link_libraries(MainSystemCore  ${pybind11_LIBS} )
 
-target_link_libraries(MainSystemCore  ${OpenCV_LIBS} )
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

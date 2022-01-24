@@ -6,7 +6,7 @@
 #include <vector>
 
 
-const int MAX_CONNECTED_CLIENT_COUNT = 3;
+const int MAX_CONNECTED_CLIENT_COUNT = 100;
 static bool isServerIsActive = true;
 
 

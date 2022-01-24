@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MainCharecterMovement : MonoBehaviour
 {
-    public static const float MOUSE_INPUT_SENSETIVITY = 2.0f;
+    public const float MOUSE_INPUT_SENSITIVITY = 2.0f;
 
     const float SLOWERING_SPEED = 0.7f;
     

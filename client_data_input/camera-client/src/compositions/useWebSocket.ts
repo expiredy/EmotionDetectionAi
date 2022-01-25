@@ -28,9 +28,9 @@ export function initializeSocket(func: Function = plug) {
     
     socketConfig.socketConnection.onclose = function(event: any) {
             if (event.wasClean) {
-              alert('Perfectly ending (like in One Piece (get it?))');
+                alert('Perfectly ending (like in One Piece (get it?))');
             } else {
-              alert('Connection is lost :<'); 
+                alert('Connection is lost :<'); 
             }
             alert('Error code (not js code, bruh): ' + event.code + ' the reason: ' + event.reason + '\nJust kidding, it is all js problem, totally not my');
     };

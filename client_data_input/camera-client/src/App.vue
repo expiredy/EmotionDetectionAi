@@ -15,6 +15,7 @@
 import OptionNavBar from '@/components/OptionNavBar.vue'
 import DebugViewer from '@/components/DebugViewer.vue'
 
+console.log(window.name);
 
 export default {
     name: 'App',
@@ -23,6 +24,9 @@ export default {
         DebugViewer
     }
 }
+
+
+
 </script>
 
 <style>

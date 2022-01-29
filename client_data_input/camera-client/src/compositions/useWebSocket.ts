@@ -6,7 +6,7 @@ const socketConfig = {
 function plug(){}
 
 
-export function initializeSocket(func: Function = plug) {
+export default function initializeSocket(func: Function = plug) {
     socketConfig.socketConnection = new WebSocket(socketUrl);
 
     socketConfig.socketConnection.onopen = () => {

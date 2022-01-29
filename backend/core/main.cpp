@@ -1,6 +1,7 @@
 #include <iostream>
 #include <WS2tcpip.h>
 #include <thread>
+#include "opencv2/opencv.hpp"
 #pragma comment(lib, "ws2_32.lib")
 #include <string>
 #include <vector>
@@ -112,7 +113,7 @@ private:
 
     void StartListening(){
         bind(listeningSocket, (sockaddr*)&connectionHint, sizeof(connectionHint));
-        listen(listeningSocket, SOMAXCONN);
+        listen(listeningSocket, MAX_CONNECTED_CLIENT_COUNT);
     }
 
     void SetConnectionHintWay(){
@@ -148,20 +149,17 @@ private:
                 std::cout << clientConnectionName << " connected on port " <<
                           ntohs(client.sin_port) << std::endl;
             }
-            if (clientsControllersHolder.size() < MAX_CONNECTED_CLIENT_COUNT){
-                ClientStructrController newClient = ClientStructrController(newClientConnection);
-                clientsControllersHolder.push_back(newClient);
-            }
-            else{
-                isConnectionLoopIsAvailable = false;
-            }
+
+            ClientStructrController newClient = ClientStructrController(newClientConnection);
+            clientsControllersHolder.push_back(newClient);
+
         }
     }
-
 };
 
 int main()
 {
+	std::cout << "Execution has been started" << std::endl;
     SocketConnectionVideoReceiver currentServer = SocketConnectionVideoReceiver(true, true);
     currentServer.EndSession();
 

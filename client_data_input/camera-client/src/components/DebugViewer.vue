@@ -34,16 +34,13 @@ function createCameraElement() {
         alert("May the browser didn't support or there is some errors.");
     });
 }
-
 function stopCameraStream(){
     let tracks = this.$refs.camera.srcObject.getTracks();
-
     tracks.forEach(track => {
         console.log(track);
         track.stop();
     });
 }
-
 function toggleCamera () {
     if (this.isCameraActive) {
     	this.isCameraActive = false;
@@ -53,11 +50,8 @@ function toggleCamera () {
         this.createCameraElement();
         }
 }
-
-
 let isCameraActive = true;
 let isFrameLoading = false;
-
 window.addEventListener('load', toggleCamera);
 
 export default {

@@ -17,6 +17,9 @@ add_executable(MainSystemCore main.cpp)
 include_directories(${pybind11_INCLUDE_DIRS})
 target_link_libraries(MainSystemCore  ${pybind11_LIBS} )
 
+FIND_PACKAGE( OpenCV REQUIRED )
+INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
+target_link_libraries(MainSystemCore ${OpenCV_LIBS} )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

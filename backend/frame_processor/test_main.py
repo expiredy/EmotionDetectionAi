@@ -16,7 +16,8 @@ class FrameProcessingThread(Thread):
     array_of_face_boxes = list
 
     def __init__(self, processing_video_frame, array_of_face_boxes):
-        self.processing_video_frame, self.array_of_face_boxes = processing_video_frame, array_of_face_boxes
+        self.processing_video_frame = processing_video_frame
+        self.array_of_face_boxes = self.__face_box_data_processor(array_of_face_boxes)
         super(FrameProcessingThread, self).__init__()
         self.stop_thread_event = threading.Event()
 
@@ -30,6 +31,12 @@ class FrameProcessingThread(Thread):
         if person_id >= 0:
             send_request_to_api(person_id, person_gender, person_age, person_mood)
         print(f"{self.getName()} is started")
+
+    @staticmethod
+    def __face_box_data_processor(self, current_face_box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+        return current_face_box[0], current_face_box[1],\
+               current_face_box[2] + current_face_box[0],\
+               current_face_box[3] + current_face_box[1]
 
 
 class NeuralNetworkProcessManager:

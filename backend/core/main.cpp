@@ -1,6 +1,5 @@
 #include <iostream>
 #include <WS2tcpip.h>
-#include <thread>
 #include "opencv2/opencv.hpp"
 #pragma comment(lib, "ws2_32.lib")
 #include <string>

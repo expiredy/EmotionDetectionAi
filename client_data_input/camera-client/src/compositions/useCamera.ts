@@ -8,5 +8,5 @@ export const createCameraSession = (canvas: any) => {
 }
 
 export function sendFrame(){
-    socket.emit('stream', canvas.toDataURL('image/webp'));
+    // socket.emit('stream', canvas.toDataURL('image/webp'));
 }

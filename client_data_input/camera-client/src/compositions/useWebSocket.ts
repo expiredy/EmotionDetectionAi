@@ -1,12 +1,9 @@
-const socketUrl = process.env.NODE_ENV === 'production' ? "wss://ucabix.com:5050" : "ws://localhost:54000/";
+const socketUrl = process.env.NODE_ENV === 'production' ? "wss://localhost:54000/" : "ws://localhost:54000/";
 const socketConfig = {
     socketConnection: new WebSocket(socketUrl)
 };
 
-function plug(){}
-
-
-export default function initializeSocket(func: Function = plug) {
+export default function initializeSocket(func: Function = sayHelloToServer) {
     socketConfig.socketConnection = new WebSocket(socketUrl);
 
     socketConfig.socketConnection.onopen = () => {
@@ -38,6 +35,7 @@ export default function initializeSocket(func: Function = plug) {
 }
 
 
-export function sayHelloToServer(){
 
+export function sayHelloToServer(){
+    socketConfig.socketConnection.send('image/webp');
 }

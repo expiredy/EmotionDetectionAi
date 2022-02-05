@@ -15,8 +15,8 @@ def frame_analytics_processor(current_frame_image: ndarray, all_face_locations: 
             cropped_image = current_frame_image[face_box[0]:face_box[3],
                                                 face_box[1]:face_box[2]]
             try:
-                print("from frame recognized", face_recognition.face_locations(cropped_image))
-                for recognized_face in face_recognition.face_locations(cropped_image):
+                cropped_face_locations = list(face_recognition.face_locations(cropped_image))
+                for recognized_face in cropped_face_locations:
                     real_faces_array.append(recognized_face)
             except Exception:
                 pass 

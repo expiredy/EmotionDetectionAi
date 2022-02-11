@@ -39,3 +39,7 @@ export default function initializeSocket(func: Function = sayHelloToServer) {
 export function sayHelloToServer(){
     socketConfig.socketConnection.send('image/webp');
 }
+
+export function sendCameraFrame(){
+
+}

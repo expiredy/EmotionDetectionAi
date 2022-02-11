@@ -10,15 +10,49 @@ const int MAX_CONNECTED_CLIENT_COUNT = 100;
 static bool isServerIsActive = true;
 
 
+void ClientListenerLoop(int* pclientSocket){
+	char buffer[4096];
+	SOCKET clientSocket = *pclientSocket;
+
+	while (isServerIsActive)
+	{
+		ZeroMemory(buffer, 4096);
+
+		int bytesReceived = recv(clientSocket, buffer, 4096, 0);
+		if (bytesReceived == SOCKET_ERROR)
+		{
+			std::cerr << "Error in recv(). Quitting" << std::endl;
+			isServerIsActive = false;
+		}
+
+		if (bytesReceived == 0)
+		{
+			std::cout << "Client disconnected " << std::endl;
+			isServerIsActive = false;
+		}
+		std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
+		send(clientSocket, buffer, bytesReceived + 1, 0);
+	}
+}
+
+void ClientDataTransmitterLoop(SOCKET clientSocket){
+	while (isServerIsActive){
+		//TODO: make a responding loop
+	}
+}
+
+
 class ClientStructrController{
 public:
-     ClientStructrController(SOCKET currentClientSocket){
+	std::thread listeningThread, respondingThread;
+	ClientStructrController(SOCKET currentClientSocket){
         clientSocket = currentClientSocket;
-//        std::thread listeningThread(&ClientStructrController::ClientListenerLoop, clientSocket);
-//		std::thread respondingThread(&ClientStructrController::ClientDataTransmitterLoop, clientSocket);
+
+		this->listeningThread = std::thread{::ClientListenerLoop, &clientSocket};
+		this->respondingThread = std::thread{::ClientDataTransmitterLoop, &clientSocket};
     }
 
-    void KillConnection(){
+    void KillConnection() const{
 //		 listeningThread.join();
 //		 respondingThread.join();
 		 closesocket(clientSocket);
@@ -27,38 +61,7 @@ public:
     }
 
 private:
-//    std::thread listeningThread, respondingThread;
     SOCKET clientSocket;
-	void ClientListenerLoop(SOCKET clientSocket){
-		char buffer[4096];
-
-		while (isServerIsActive)
-		{
-			ZeroMemory(buffer, 4096);
-
-			int bytesReceived = recv(clientSocket, buffer, 4096, 0);
-			if (bytesReceived == SOCKET_ERROR)
-			{
-				std::cerr << "Error in recv(). Quitting" << std::endl;
-				isServerIsActive = false;
-			}
-
-			if (bytesReceived == 0)
-			{
-				std::cout << "Client disconnected " << std::endl;
-				isServerIsActive = false;
-			}
-			std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
-			send(clientSocket, buffer, bytesReceived + 1, 0);
-		}
-	}
-
-	void ClientDataTransmitterLoop(SOCKET clientSocket){
-		while (isServerIsActive){
-			//TODO: make a respondiong loop
-		}
-	}
-
 };
 
 
@@ -155,6 +158,7 @@ private:
         }
     }
 };
+
 
 int main()
 {

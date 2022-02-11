@@ -5,7 +5,8 @@
   
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "deploy": ""
   },
   "dependencies": {
     "reconnecting-websocket": "^4.4.0",

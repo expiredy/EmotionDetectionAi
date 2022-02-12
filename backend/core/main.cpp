@@ -10,9 +10,8 @@ const int MAX_CONNECTED_CLIENT_COUNT = 100;
 static bool isServerIsActive = true;
 
 
-void ClientListenerLoop(int* pclientSocket){
+void ClientListenerLoop(SOCKET clientSocket){
 	char buffer[4096];
-	SOCKET clientSocket = *pclientSocket;
 
 	while (isServerIsActive)
 	{
@@ -73,7 +72,7 @@ public:
         isServerIsActive = listeningLoopFlag;
         isConnectionLoopIsAvailable = connectionLoopFlag;
         listeningSocket = initializeListeningSocketServer();
-        clientsControllersHolder = std::vector<ClientStructrController>();
+        clientsControllersHolder = clientsControllersHolder[];
         StartConnectingToServerSession();
     }
 
@@ -83,9 +82,9 @@ public:
 
 private:
     SOCKET listeningSocket;
-    sockaddr_in connectionHint;
-    WSADATA winSocketData;
-    std::vector<ClientStructrController> clientsControllersHolder;
+    sockaddr_in connectionHint{};
+    WSADATA winSocketData{};
+    ClientStructrController[] clientsControllersHolder;
 
     SOCKET initializeListeningSocketServer(){
 
@@ -122,7 +121,6 @@ private:
         connectionHint.sin_family = AF_INET;
         connectionHint.sin_port = htons(54000);
         connectionHint.sin_addr.S_un.S_addr = INADDR_ANY;
-
     }
 
     void StartConnectingToServerSession(){

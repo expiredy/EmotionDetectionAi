@@ -19,8 +19,8 @@
 function createCameraElement() {
     this.isFrameLoading = true;
     const constraints = (window.constraints = {
-    audio: false,
-    video: true
+        audio: false,
+        video: true
     });
     
     navigator.mediaDevices
@@ -41,18 +41,19 @@ function stopCameraStream(){
         track.stop();
     });
 }
-function toggleCamera () {
+function toggleCamera() {
     if (this.isCameraActive) {
     	this.isCameraActive = false;
         this.stopCameraStream();
     } else {
     	this.isCameraActive = true;
         this.createCameraElement();
-        }
+    }
 }
+
 let isCameraActive = true;
 let isFrameLoading = false;
-window.addEventListener('load', toggleCamera);
+window.addEventListener('load', toggleCamera());
 
 export default {
     name: 'DebugViewer',

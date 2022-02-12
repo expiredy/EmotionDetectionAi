@@ -2,11 +2,11 @@ export const initializeCameraInputSession = () => {
     
 }
 function createCameraStream(){
-    
+
 }
 
 
-function AllowUsingCamera(){
+function AllowUsingCamera(navigator: any){
     navigator.getUserMedia = ( navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msgGetUserMedia );
 
     if(navigator.getUserMedia)

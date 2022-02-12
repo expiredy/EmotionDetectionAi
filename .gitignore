@@ -380,6 +380,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-
 #.env file's configuration
 **/.env

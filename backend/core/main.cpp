@@ -1,6 +1,6 @@
 #include <iostream>
 #include <WS2tcpip.h>
-#include <thread>
+#include "opencv2/opencv.hpp"
 #pragma comment(lib, "ws2_32.lib")
 #include <string>
 #include <vector>
@@ -10,15 +10,48 @@ const int MAX_CONNECTED_CLIENT_COUNT = 100;
 static bool isServerIsActive = true;
 
 
+void ClientListenerLoop(SOCKET clientSocket){
+	char buffer[4096];
+
+	while (isServerIsActive)
+	{
+		ZeroMemory(buffer, 4096);
+
+		int bytesReceived = recv(clientSocket, buffer, 4096, 0);
+		if (bytesReceived == SOCKET_ERROR)
+		{
+			std::cerr << "Error in recv(). Quitting" << std::endl;
+			isServerIsActive = false;
+		}
+
+		if (bytesReceived == 0)
+		{
+			std::cout << "Client disconnected " << std::endl;
+			isServerIsActive = false;
+		}
+		std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
+		send(clientSocket, buffer, bytesReceived + 1, 0);
+	}
+}
+
+void ClientDataTransmitterLoop(SOCKET clientSocket){
+	while (isServerIsActive){
+		//TODO: make a responding loop
+	}
+}
+
+
 class ClientStructrController{
 public:
-     ClientStructrController(SOCKET currentClientSocket){
+	std::thread listeningThread, respondingThread;
+	ClientStructrController(SOCKET currentClientSocket){
         clientSocket = currentClientSocket;
-//        std::thread listeningThread(&ClientStructrController::ClientListenerLoop, clientSocket);
-//		std::thread respondingThread(&ClientStructrController::ClientDataTransmitterLoop, clientSocket);
+
+		this->listeningThread = std::thread{::ClientListenerLoop, &clientSocket};
+		this->respondingThread = std::thread{::ClientDataTransmitterLoop, &clientSocket};
     }
 
-    void KillConnection(){
+    void KillConnection() const{
 //		 listeningThread.join();
 //		 respondingThread.join();
 		 closesocket(clientSocket);
@@ -27,38 +60,7 @@ public:
     }
 
 private:
-//    std::thread listeningThread, respondingThread;
     SOCKET clientSocket;
-	void ClientListenerLoop(SOCKET clientSocket){
-		char buffer[4096];
-
-		while (isServerIsActive)
-		{
-			ZeroMemory(buffer, 4096);
-
-			int bytesReceived = recv(clientSocket, buffer, 4096, 0);
-			if (bytesReceived == SOCKET_ERROR)
-			{
-				std::cerr << "Error in recv(). Quitting" << std::endl;
-				isServerIsActive = false;
-			}
-
-			if (bytesReceived == 0)
-			{
-				std::cout << "Client disconnected " << std::endl;
-				isServerIsActive = false;
-			}
-			std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
-			send(clientSocket, buffer, bytesReceived + 1, 0);
-		}
-	}
-
-	void ClientDataTransmitterLoop(SOCKET clientSocket){
-		while (isServerIsActive){
-			//TODO: make a respondiong loop
-		}
-	}
-
 };
 
 
@@ -70,7 +72,7 @@ public:
         isServerIsActive = listeningLoopFlag;
         isConnectionLoopIsAvailable = connectionLoopFlag;
         listeningSocket = initializeListeningSocketServer();
-        clientsControllersHolder = std::vector<ClientStructrController>();
+        clientsControllersHolder = clientsControllersHolder[];
         StartConnectingToServerSession();
     }
 
@@ -80,9 +82,9 @@ public:
 
 private:
     SOCKET listeningSocket;
-    sockaddr_in connectionHint;
-    WSADATA winSocketData;
-    std::vector<ClientStructrController> clientsControllersHolder;
+    sockaddr_in connectionHint{};
+    WSADATA winSocketData{};
+    ClientStructrController* clientsControllersHolder = new ClientStructrController[MAX_CONNECTED_CLIENT_COUNT];
 
     SOCKET initializeListeningSocketServer(){
 
@@ -112,14 +114,13 @@ private:
 
     void StartListening(){
         bind(listeningSocket, (sockaddr*)&connectionHint, sizeof(connectionHint));
-        listen(listeningSocket, SOMAXCONN);
+        listen(listeningSocket, MAX_CONNECTED_CLIENT_COUNT);
     }
 
     void SetConnectionHintWay(){
         connectionHint.sin_family = AF_INET;
         connectionHint.sin_port = htons(54000);
         connectionHint.sin_addr.S_un.S_addr = INADDR_ANY;
-
     }
 
     void StartConnectingToServerSession(){
@@ -148,20 +149,18 @@ private:
                 std::cout << clientConnectionName << " connected on port " <<
                           ntohs(client.sin_port) << std::endl;
             }
-            if (clientsControllersHolder.size() < MAX_CONNECTED_CLIENT_COUNT){
-                ClientStructrController newClient = ClientStructrController(newClientConnection);
-                clientsControllersHolder.push_back(newClient);
-            }
-            else{
-                isConnectionLoopIsAvailable = false;
-            }
+
+            ClientStructrController newClient = ClientStructrController(newClientConnection);
+            clientsControllersHolder.push_back(newClient);
+
         }
     }
-
 };
+
 
 int main()
 {
+	std::cout << "Execution has been started" << std::endl;
     SocketConnectionVideoReceiver currentServer = SocketConnectionVideoReceiver(true, true);
     currentServer.EndSession();
 

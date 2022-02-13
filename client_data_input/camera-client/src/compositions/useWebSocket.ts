@@ -1,12 +1,9 @@
-const socketUrl = process.env.NODE_ENV === 'production' ? "wss://ucabix.com:5050" : "ws://localhost:54000/";
+const socketUrl = process.env.NODE_ENV === 'production' ? "wss://localhost:54000/" : "ws://localhost:54000/";
 const socketConfig = {
     socketConnection: new WebSocket(socketUrl)
 };
 
-function plug(){}
-
-
-export function initializeSocket(func: Function = plug) {
+export default function initializeSocket(func: Function = sayHelloToServer) {
     socketConfig.socketConnection = new WebSocket(socketUrl);
 
     socketConfig.socketConnection.onopen = () => {
@@ -28,9 +25,9 @@ export function initializeSocket(func: Function = plug) {
     
     socketConfig.socketConnection.onclose = function(event: any) {
             if (event.wasClean) {
-              alert('Perfectly ending (like in One Piece (get it?))');
+                alert('Perfectly ending (like in One Piece (get it?))');
             } else {
-              alert('Connection is lost :<'); 
+                alert('Connection is lost :<'); 
             }
             alert('Error code (not js code, bruh): ' + event.code + ' the reason: ' + event.reason + '\nJust kidding, it is all js problem, totally not my');
     };
@@ -38,6 +35,11 @@ export function initializeSocket(func: Function = plug) {
 }
 
 
-export function sayHelloToServer(){
 
+export function sayHelloToServer(){
+    socketConfig.socketConnection.send('image/webp');
+}
+
+export function sendCameraFrame(){
+    
 }

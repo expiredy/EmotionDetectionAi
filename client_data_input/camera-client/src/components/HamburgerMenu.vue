@@ -19,7 +19,7 @@ export default {
     methods: {
          OpenMenu: function (event) {
             if (event) {
-               console.log('Sheeesh')
+               console.log('Sheeesh');
             }
          }
       }
@@ -41,7 +41,7 @@ export default {
  }
 
 .special-con:hover .bar {
-  background-color: #048300;
+   background-color: #048300;
 }
 
 .col {

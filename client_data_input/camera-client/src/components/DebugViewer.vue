@@ -1,13 +1,6 @@
 <template>
-    <div class="web-camera-container">
-        <div class="camera-button">
-            <button type="button" class="button is-rounded" :class="{ 'is-primary' : !isCameraOpen, 'is-danger' : isCameraOpen}" @click="toggleCamera">
-                <span>Press me</span>
-            </button>
-        </div>
-          
-        
-        <div v-if="isCameraOpen" v-show="!isLoading" class="camera-box">
+    <div class="web-camera-container">       
+        <div class="camera-box">
             <video ref="camera" :width="450" :height="337.5" autoplay></video>            
         </div>
         
@@ -16,56 +9,61 @@
 
 <script>
 
+const currentWindow = window;
+const mainStreamThread = {currentThread: null};
+
 function createCameraElement() {
-    this.isFrameLoading = true;
-    const constraints = (window.constraints = {
-    audio: false,
-    video: true
+    currentWindow.isFrameLoading = true;
+    const constraints = (currentWindow.constraints = {
+        audio: false,
+        video: true
     });
     
-    navigator.mediaDevices
+    currentWindow.navigator.mediaDevices
         .getUserMedia(constraints)
         .then(stream => {
-                    this.isFrameLoading = false;
-        this.$refs.camera.srcObject = stream;
-        })
-        .catch(error => {
-        this.isFrameLoading = false;
-        alert("May the browser didn't support or there is some errors.");
-    });
+            mainStreamThread.currentThread = stream;
+
+            var recorderOptions = {mimeType: 'video/webm; codecs=vp8'};
+            var mediaRecorder = new MediaRecorder(s, recorderOptions );
+            mediaRecorder.ondataavailable = function(event) {
+                if (event.data && event.data.size > 0) {
+                    //TODO: send with web sockets from event.data
+                }
+            }
+
+            mediaRecorder.start(100); // делит поток на кусочки по 100 мс каждый
+        }).catch(error => {
+                    alert("May the browser didn't support or there is some errors." + error.message);})
 }
 
 function stopCameraStream(){
     let tracks = this.$refs.camera.srcObject.getTracks();
-
     tracks.forEach(track => {
         console.log(track);
         track.stop();
     });
 }
-
-function toggleCamera () {
-    if (this.isCameraActive) {
-    	this.isCameraActive = false;
-        this.stopCameraStream();
+function toggleCamera() {
+    if (currentWindow.isCameraActive) {
+    	currentWindow.isCameraActive = false;
+        stopCameraStream();
     } else {
-    	this.isCameraActive = true;
-        this.createCameraElement();
-        }
+    	currentWindow.isCameraActive = true;
+        createCameraElement();
+    }
 }
 
 
-let isCameraActive = true;
-let isFrameLoading = false;
 
-window.addEventListener('load', toggleCamera);
+
+let isCameraActive = true;
+currentWindow.addEventListener('load', toggleCamera(window));
 
 export default {
     name: 'DebugViewer',
     data () {
         return {
-            isCameraOpen: isCameraActive,
-            isLoading: isFrameLoading,
             link: '#'
         }
     },
@@ -73,24 +71,7 @@ export default {
         toggleCamera,
         stopCameraStream,
         createCameraElement
-        // takePhoto() {
-        //   if(!this.isPhotoTaken) {
-        //     this.isShotPhoto = true;
-
-        //     const FLASH_TIMEOUT = 50;
-
-        //     setTimeout(() => {
-        //       this.isShotPhoto = false;
-        //     }, FLASH_TIMEOUT);
-        //   }
-
-        //   this.isPhotoTaken = !this.isPhotoTaken;
-
-        //   const context = this.$refs.canvas.getContext('2d');
-        //   context.drawImage(this.$refs.camera, 0, 0, 450, 337.5);
-        // },
-
-  }
+    }
 }
 </script>
 
@@ -108,11 +89,6 @@ export default {
     border-radius: 4px;
     width: 500px;
 
-  
-    .camera-button {
-        margin-bottom: 2rem;
-    }
-  
     .camera-box .camera-shutter {
         opacity: 0;
         width: 450px;

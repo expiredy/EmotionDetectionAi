@@ -16,7 +16,8 @@ class FrameProcessingThread(Thread):
     array_of_face_boxes = list
 
     def __init__(self, processing_video_frame, array_of_face_boxes):
-        self.processing_video_frame, self.array_of_face_boxes = processing_video_frame, array_of_face_boxes
+        self.processing_video_frame = processing_video_frame
+        self.array_of_face_boxes = [self.__face_box_data_processor(face_box) for face_box in array_of_face_boxes]
         super(FrameProcessingThread, self).__init__()
         self.stop_thread_event = threading.Event()
 
@@ -31,11 +32,18 @@ class FrameProcessingThread(Thread):
             send_request_to_api(person_id, person_gender, person_age, person_mood)
         print(f"{self.getName()} is started")
 
+    @staticmethod
+    def __face_box_data_processor(current_face_box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+        print(current_face_box)
+        return current_face_box[0], current_face_box[1],\
+               current_face_box[2] + current_face_box[0],\
+               current_face_box[3] + current_face_box[1]
+
 
 class NeuralNetworkProcessManager:
     SKIP_FRAMES_COUNT = 60
     TOTAL_ALLOWED_THREADS = 2
-    max_frames_per_second = 180
+    max_frames_per_second = 240
     fps_counter = int
     processing_loop = get_event_loop
 
@@ -59,11 +67,12 @@ class NeuralNetworkProcessManager:
                 self.__create_new_process(processing_thread_index)
 
     def __create_new_process(self, processing_thread_index: int):
+
         try:
             self.processing_threads_holder_array[processing_thread_index] = \
                 FrameProcessingThread(self.current_video_frame, self.array_of_face_boxes)
             self.processing_threads_holder_array[processing_thread_index].start()
-        except BaseException:
+        except TypeError:
             return
 
     def get_frame_update(self, current_video_frame: ndarray, array_of_face_boxes: list):
@@ -152,6 +161,8 @@ def main():
                 processing_manager.get_frame_update(image_frame, bboxs)
             if opencv.waitKey(1) == 27:
                 session_is_running = False
+    video_stream_capture.release()
+    opencv.destroyAllWindows()
 
 
 if __name__ == "__main__":

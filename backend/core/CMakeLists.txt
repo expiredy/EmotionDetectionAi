@@ -15,8 +15,11 @@ find_package(pybind11 CONFIG)
 add_executable(MainSystemCore main.cpp)
 
 include_directories(${pybind11_INCLUDE_DIRS})
-target_link_libraries(MainSystemCore  ${pybind11_LIBS} )
+target_link_libraries(${PROJECT_NAME} ${pybind11_LIBS} )
 
+find_package( OpenCV REQUIRED )
+INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

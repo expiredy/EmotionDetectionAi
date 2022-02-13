@@ -161,6 +161,8 @@ def main():
                 processing_manager.get_frame_update(image_frame, bboxs)
             if opencv.waitKey(1) == 27:
                 session_is_running = False
+    video_stream_capture.release()
+    opencv.destroyAllWindows()
 
 
 if __name__ == "__main__":

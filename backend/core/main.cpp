@@ -84,7 +84,7 @@ private:
     SOCKET listeningSocket;
     sockaddr_in connectionHint{};
     WSADATA winSocketData{};
-    ClientStructrController[] clientsControllersHolder;
+    ClientStructrController* clientsControllersHolder = new ClientStructrController[MAX_CONNECTED_CLIENT_COUNT];
 
     SOCKET initializeListeningSocketServer(){
 

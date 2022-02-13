@@ -41,5 +41,5 @@ export function sayHelloToServer(){
 }
 
 export function sendCameraFrame(){
-
+    
 }

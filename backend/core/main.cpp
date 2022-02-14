@@ -51,12 +51,11 @@ public:
 		this->respondingThread = std::thread{::ClientDataTransmitterLoop, &clientSocket};
     }
 
-    void KillConnection() const{
-//		 listeningThread.join();
-//		 respondingThread.join();
+    void KillConnection(){
+		 this->listeningThread.join();
+		 this->respondingThread.join();
 		 closesocket(clientSocket);
          WSACleanup();
-         system("pause");
     }
 
 private:
@@ -84,7 +83,7 @@ private:
     SOCKET listeningSocket;
     sockaddr_in connectionHint{};
     WSADATA winSocketData{};
-    ClientStructrController* clientsControllersHolder = new ClientStructrController[MAX_CONNECTED_CLIENT_COUNT];
+    ClientStructrController* clientsControllersHolder = *ClientStructrController[MAX_CONNECTED_CLIENT_COUNT];
 
     SOCKET initializeListeningSocketServer(){
 
